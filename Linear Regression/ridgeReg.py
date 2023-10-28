@@ -9,24 +9,30 @@ import math
 from operator import itemgetter
 
 
-class LinearRegression(object):
+class RidgeRegression(object):
     """
-     Linear Regression with closed form solution.
+     Ridge Regression.
     """
     def __init__(self):
         self.w=None
-    def fit(self, X, y):
+        self.b=None
+    def fit(self, X, y, alpha=0):
         """
-        Fits the linear regression model to the training data.
+        Fits the ridge regression model to the training data.
 
         Arguments
         ----------
         X: nxp matrix of n examples with p independent variables
         y: response variable vector for n examples
+        alpha: regularization parameter.
         """
-       	# augmented X with extra column of 1's
-       	X=np.hstack((X,np.ones((X.shape[0],1))))
-        self.w=np.linalg.inv(X.T@X)@X.T@y
+        # augmented X with extra column of 1's
+       	X=np.hstack((X, np.ones((X.shape[0],1))))
+        # excluding the bias term!!!
+        I=np.identity(X.shape[1])
+        I[0,0]=0
+        # closed form solution
+        self.w=np.linalg.inv(X.T@X+alpha*I)@X.T@y
         
     def predict(self, X):
         """
@@ -40,8 +46,8 @@ class LinearRegression(object):
         ----------
         response variable vector for n examples
         """
-        # augment test input X
-        X=np.hstack((X,np.ones((X.shape[0],1))))
+         # augment test input X
+        X=np.hstack((X, np.ones((X.shape[0],1))))
         return X@self.w
 
     def rmse(self, X, y):

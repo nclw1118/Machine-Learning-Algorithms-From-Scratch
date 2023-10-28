@@ -2,57 +2,66 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
-import math
+import pandas as pd 
+from matplotlib import pyplot as plt
 
 from operator import itemgetter
 
 
-class LinearRegression(object):
+class PolynomialRegression(object):
     """
-     Linear Regression with closed form solution.
+     Polynomial Regression.
     """
+    
     def __init__(self):
         self.w=None
-    def fit(self, X, y):
+        self.k=None
+
+    def fit(self, X, y, k):
         """
-        Fits the linear regression model to the training data.
+        Fits the polynomial regression model to the training data.
 
         Arguments
         ----------
-        X: nxp matrix of n examples with p independent variables
+        X: nx1 matrix of n examples
         y: response variable vector for n examples
+        k: polynomial degree
         """
-       	# augmented X with extra column of 1's
-       	X=np.hstack((X,np.ones((X.shape[0],1))))
-        self.w=np.linalg.inv(X.T@X)@X.T@y
+        poly=np.zeros((X.shape[0],k+1))
+        for i in range(0,k+1):
+            poly[:,i]=np.array(X)**i
+            
+        self.w=np.linalg.inv(poly.T@poly)@(poly.T)@y
+        self.k=k
         
+
     def predict(self, X):
         """
         Predicts the dependent variable of new data using the model.
 
         Arguments
         ----------
-        X: nxp matrix of n examples with p covariates
+        X: nx1 matrix of n examples
 
         Returns
         ----------
         response variable vector for n examples
         """
-        # augment test input X
-        X=np.hstack((X,np.ones((X.shape[0],1))))
-        return X@self.w
+        poly=np.zeros((X.shape[0],self.k+1))
+        for i in range(0,self.k+1):
+            poly[:,i]=np.array(X)**i
+        return poly@self.w
 
     def rmse(self, X, y):
         """
         Returns the RMSE(Root Mean Squared Error) when the model is validated.
-            
+        
         Arguments
         ----------
-        X: nxp matrix of n examples with p covariates
+        X: nx1 matrix of n examples
         y: response variable vector for n examples
-            
+        
         Returns
         ----------
         RMSE when model is used to predict y
